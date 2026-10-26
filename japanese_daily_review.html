@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的日语口语复习</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#202538;--muted:#687087;--accent:#6257d9;--soft:#eeecff;--line:#e4e6ef;--good:#18794e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+header{background:linear-gradient(135deg,#6257d9,#9185ee);color:white;padding:28px 18px 25px}
+.wrap{max-width:850px;margin:auto;padding:0 16px}h1{font-size:27px;line-height:1.25;margin:0 0 8px}header p{margin:0;opacity:.94}
+main{padding:18px 0 50px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.stat,.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px}.stat strong{display:block;font-size:23px}.stat span{font-size:12px;color:var(--muted)}
+nav{display:flex;gap:8px;overflow:auto;margin:0 0 16px;padding-bottom:3px}.tab{border:1px solid var(--line);border-radius:999px;background:white;padding:9px 14px;white-space:nowrap;color:var(--ink);cursor:pointer}.tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+h2{font-size:19px;margin:0 0 8px}h3{font-size:16px;margin:0 0 6px}.muted{color:var(--muted);font-size:14px}.jp{font-size:19px;font-weight:650;margin:10px 0}.cn{margin:5px 0}.tag{display:inline-block;background:var(--soft);color:#5146bd;border-radius:6px;padding:2px 8px;font-size:12px;margin-bottom:5px}
+button{font:inherit;cursor:pointer}.primary,.secondary,.reveal{border:0;border-radius:10px;padding:10px 14px}.primary{background:var(--accent);color:white}.secondary,.reveal{background:var(--soft);color:#5146bd}.rowbtn{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.panel{margin-bottom:14px}.progress{height:8px;border-radius:99px;background:#eceef5;overflow:hidden;margin:8px 0 14px}.progress div{height:100%;background:var(--accent);width:0;transition:width .2s}
+input,textarea,select{font:inherit;width:100%;padding:11px 12px;border:1px solid #d8dbea;border-radius:10px;background:white;color:var(--ink);margin:6px 0 10px}textarea{min-height:85px;resize:vertical}
+.answer{display:none;background:#f8f7ff;border-radius:10px;padding:12px;margin-top:10px}.answer.show{display:block}.item{border-top:1px solid var(--line);padding:13px 0}.item:first-of-type{border-top:0}.checkline{display:flex;align-items:flex-start;gap:9px}.checkline input{width:auto;margin-top:7px}.feedback{font-size:14px;margin-top:6px}.good{color:var(--good)}.hide{display:none!important}.footer{font-size:12px;color:var(--muted);text-align:center;margin-top:22px}
+@media(min-width:650px){.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cards .card{margin-bottom:0}.stats{gap:14px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>我的日语口语复习</h1><p>每天 10 分钟：先想表达意思，再自己组句，最后对照自然说法。</p></div></header>
+<main class="wrap">
+<div class="stats">
+ <div class="stat"><strong id="doneCount">0</strong><span>今日完成项</span></div>
+ <div class="stat"><strong>10 分钟</strong><span>建议复习时长</span></div>
+ <div class="stat"><strong id="dayLabel">Day 1</strong><span>今日练习</span></div>
+</div>
+<div class="progress"><div id="progressBar"></div></div>
+<nav>
+<button class="tab active" data-tab="patterns">句型卡片</button>
+<button class="tab" data-tab="quiz">中文造句</button>
+<button class="tab" data-tab="speaking">口头输出</button>
+<button class="tab" data-tab="plan">每日流程</button>
+</nav>
+<section id="patterns">
+ <div class="panel"><h2>高频句型卡片</h2><p class="muted">先遮住答案，试着用日语说出来。重点不是背整句，而是记住可以替换的结构。</p></div>
+ <div id="flashcards" class="cards"></div>
+</section>
+<section id="quiz" class="hide">
+ <div class="panel"><h2>中文提示 → 自己造句</h2><p class="muted">先自己写，不要急着看参考答案。完成后点击“对照参考”。</p><div id="quizList"></div></div>
+</section>
+<section id="speaking" class="hide">
+ <div class="panel"><h2>不看范文，自己说 3 句</h2><p>主题：<strong id="topic"></strong></p><p class="muted">可以说得很简单。每句只表达一个意思；卡住时先说关键词，再补上句尾。</p>
+ <ol><li>今天发生了什么？</li><li>当时你怎么想／有什么感受？</li><li>接下来打算怎么做？</li></ol>
+ <label for="speech">记下你刚才说的日语（可选）</label><textarea id="speech" placeholder="先试着口头说，再把自己说出的句子记下来……"></textarea>
+ <button class="primary" id="saveSpeech">保存今天的输出</button><p id="speechMsg" class="feedback"></p>
+ </div>
+ <div class="panel"><h3>卡住时，只给自己一个提示</h3><ul><li>不知道怎么做：どうすればいいか分からない</li><li>明明……却……：〜のに、〜</li><li>越……越……：〜ば〜ほど</li><li>一想要……就……：〜ようとすると</li><li>能够……：可能形（話せる・伝えられる）</li></ul></div>
+</section>
+<section id="plan" class="hide">
+ <div class="panel"><h2>每日 10 分钟流程</h2><div id="checklist">
+ <label class="checkline"><input type="checkbox" data-check="1"> <span><b>2 分钟｜回忆句型</b><br><span class="muted">看中文意思，先在脑中调出日语结构。</span></span></label>
+ <label class="checkline"><input type="checkbox" data-check="2"> <span><b>3 分钟｜自己造句</b><br><span class="muted">同一个句型换成自己的内容，不照抄例句。</span></span></label>
+ <label class="checkline"><input type="checkbox" data-check="3"> <span><b>3 分钟｜开口说</b><br><span class="muted">每句先说出来，不因小错误中途停下。</span></span></label>
+ <label class="checkline"><input type="checkbox" data-check="4"> <span><b>2 分钟｜自然度检查</b><br><span class="muted">检查助词、句尾，以及日常口语是否自然。</span></span></label>
+ </div><div class="rowbtn"><button class="primary" id="resetDay">重置今日打卡</button><button class="secondary" id="newTopic">换一个口头主题</button></div></div>
+ <div class="panel"><h3>复习原则</h3><p>① 先表达意思，不要逐字翻译中文。② 先把句子说完，再修正。③ 同一结构要换内容反复用，才会从“看得懂”变成“说得出”。</p></div>
+</section>
+<div class="footer">你的练习进度保存在当前浏览器中；清除浏览器数据或换设备后，记录可能不会保留。</div>
+</main>
+<script>
+const patterns=[
+{tag:"怎么做才好",cn:"我不知道该怎么向日本人解释自己的想法。",jp:"日本人に自分の考えをどう説明すればいいか分からない。",note:"どう＋动词条件形＋ばいいか分からない。説明する→説明すれば。"},
+{tag:"明明……却……",cn:"明明学了很多语法，实际说的时候却用不出来。",jp:"文法をたくさん勉強したのに、実際に話そうとすると全然使えない。",note:"〜のに表示预期与现实相反；話そうとすると＝一想要开口说时。"},
+{tag:"越……越……",cn:"越担心说错，就越不敢开口。",jp:"間違えるのを心配すればするほど、口を開けなくなる。",note:"动词条件形＋ば＋同一动词辞书形＋ほど。也可以说「間違いを気にすればするほど」。"},
+{tag:"可能形",cn:"我听得懂日本人说的话，却不知道怎么自然地表达自己的想法。",jp:"日本人の話は聞き取れるのに、自分の考えをどう自然に伝えればいいか分からない。",note:"聞き取れる＝听得清并理解；は带有对比语气。伝える→伝えられる。"},
+{tag:"本来打算……",cn:"本来打算早点睡，结果一直看手机，回过神来已经这么晚了。",jp:"早く寝るつもりだったのに、ずっとスマホを見ていて、気づいたらもうこんな時間だった。",note:"〜つもりだったのに＋気づいたら。口语中「ずっとスマホ見てて」也很自然。"},
+{tag:"应该先……",cn:"我知道应该多练习，可每次想开口时都会担心自己说得自不自然。",jp:"もっと練習したほうがいいのは分かってるけど、話そうとすると、自然に話せるか心配になる。",note:"「〜たほうがいいのは分かってるけど」适合表达“我知道是该……，可是……”。"},
+{tag:"变得能够……",cn:"我想练习到能自然地说日语。",jp:"日本語を自然に話せるようになるまで練習したい。",note:"可能形＋ようになる＝逐渐变得能够……；「話せるようになるには、どう練習すればいい？」"},
+{tag:"不是不……",cn:"不是完全不知道想说什么，而是不知道怎么用日语表达。",jp:"何を言いたいのか分からないわけじゃなくて、日本語でどう表現すればいいか分からない。",note:"〜わけじゃなくて＝并不是……；后半句说明真正的问题。"}
+];
+const quiz=[
+{q:"我不知道该怎么安排每天的学习计划。",a:"毎日の勉強の予定をどう立てればいいか分からない。",hint:"予定を立てる／どう〜すればいいか分からない"},
+{q:"明明想早点开始，却因为不知道该做什么而犹豫，最后什么也没做。",a:"早く始めたほうがいいのは分かっていたのに、何をすればいいか迷って、結局何もしなかった。",hint:"〜のに／何をすればいいか／結局"},
+{q:"越担心自己说得不自然，就越难把想法表达出来。",a:"不自然に聞こえないか心配すればするほど、自分の考えをうまく伝えられなくなる。",hint:"〜か心配する／〜ば〜ほど／伝えられない"},
+{q:"我知道应该多练习，但一到真正要说的时候，就会在脑子里反复组织句子。",a:"もっと練習したほうがいいのは分かっているけど、いざ話そうとすると、頭の中で何度も文を組み立ててしまう。",hint:"〜のは分かっているけど／いざ〜とすると"}
+];
+const topics=["今天让你有点烦恼的一件小事","今天做过的一件事","最近一直拖着没做的事","今天的身体状态或心情","最近学日语时遇到的困难","明天想完成的一件小事"];
+let topicIndex=0;
+const $=s=>document.querySelector(s);
+function loadChecks(){return JSON.parse(localStorage.getItem("jpChecks")||"{}")}
+function updateProgress(){let c=loadChecks(),n=Object.values(c).filter(Boolean).length;$("#doneCount").textContent=n;$("#progressBar").style.width=(n/4*100)+"%";document.querySelectorAll("[data-check]").forEach(x=>x.checked=!!c[x.dataset.check])}
+function renderCards(){let el=$("#flashcards");el.innerHTML="";patterns.forEach((p,i)=>{let d=document.createElement("div");d.className="card";d.innerHTML=`<span class="tag">${p.tag}</span><p class="cn">${p.cn}</p><button class="reveal">显示日语与讲解</button><div class="answer"><div class="jp">${p.jp}</div><p class="muted">${p.note}</p><button class="secondary mark">今天复习过</button></div>`;d.querySelector(".reveal").onclick=()=>{let a=d.querySelector(".answer");a.classList.toggle("show");d.querySelector(".reveal").textContent=a.classList.contains("show")?"隐藏答案":"显示日语与讲解"};d.querySelector(".mark").onclick=()=>{let c=loadChecks();c["card"+i]=true;localStorage.setItem("jpCards",JSON.stringify(c));d.querySelector(".mark").textContent="已复习 ✓"};el.appendChild(d)})}
+function renderQuiz(){let el=$("#quizList");el.innerHTML="";quiz.forEach((q,i)=>{let d=document.createElement("div");d.className="item";d.innerHTML=`<h3>${i+1}. ${q.q}</h3><p class="muted">提示：${q.hint}</p><textarea placeholder="试着自己写日语……" aria-label="第${i+1}题答案"></textarea><button class="reveal">对照参考答案</button><div class="answer"><div class="jp">${q.a}</div><p class="muted">对照时检查：结构是否完整、助词是否自然、句尾是否符合想表达的时间和语气。</p></div>`;d.querySelector("button").onclick=()=>{let a=d.querySelector(".answer");a.classList.toggle("show");d.querySelector("button").textContent=a.classList.contains("show")?"隐藏参考答案":"对照参考答案"};el.appendChild(d)})}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));["patterns","quiz","speaking","plan"].forEach(id=>$("#"+id).classList.toggle("hide",id!==b.dataset.tab))});
+document.querySelectorAll("[data-check]").forEach(x=>x.onchange=()=>{let c=loadChecks();c[x.dataset.check]=x.checked;localStorage.setItem("jpChecks",JSON.stringify(c));updateProgress()});
+$("#resetDay").onclick=()=>{localStorage.removeItem("jpChecks");$("#speech").value="";$("#speechMsg").textContent="";updateProgress()};
+$("#newTopic").onclick=()=>{topicIndex=(topicIndex+1)%topics.length;$("#topic").textContent=topics[topicIndex]};
+$("#saveSpeech").onclick=()=>{localStorage.setItem("jpSpeech",$("#speech").value);$("#speechMsg").textContent="已保存在当前浏览器中。下次可以回来看自己说过什么。";$("#speechMsg").className="feedback good"};
+$("#topic").textContent=topics[0];if(localStorage.getItem("jpSpeech"))$("#speech").value=localStorage.getItem("jpSpeech");
+renderCards();renderQuiz();updateProgress();
+</script>
+</body></html>
