@@ -78,15 +78,65 @@ summary::-webkit-details-marker{display:none}
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const load=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'))}catch(e){return new Set()}};
+const load=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]').map(String))}catch(e){return new Set()}};
 const save=()=>{try{localStorage.setItem('jv_star',JSON.stringify([...S]));localStorage.setItem('jv_done',JSON.stringify([...M]))}catch(e){}};
 let D=[],S=load('jv_star'),M=load('jv_done'),tab='list',filter='all',kw='';
 let fc={deck:[],i:0,flip:false,all:false},qz={cur:null,show:false,right:0,total:0,pool:[]};
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 
+/* ===== 字段映射：换了JSON结构，只需改这里 =====
+   左边是页面用的字段，右边是你的JSON里可能出现的字段名，按顺序取第一个有值的。 */
+const MAP={
+  id:['id','ID','no','index','key'],
+  word:['word','term','vocab','expression','headword','text','单词','単語','日本語'],
+  reading:['reading','kana','yomi','furigana','pronunciation','读音','読み'],
+  kanji:['kanji','writing','汉字','漢字'],
+  pos:['pos','part_of_speech','品詞','词性'],
+  meaning:['meaning','meanings','definition','definitions','gloss','translation','意思','释义'],
+  frequency:['frequency','freq','频率'],
+  paraphrases:['paraphrases','synonyms','alternatives','言い換え'],
+  mnemonic:['mnemonic','memo','tip','hint','记忆'],
+  examples:['examples','example','sentences'],
+  quiz:['quiz','question'],
+  note:['note','notes','remark'],
+  input:['input']
+};
+const SUB={ex:{ja:['ja','jp','japanese','text','sentence'],zh:['zh','cn','translation','meaning'],casual:['casual','colloquial']},qz:{q:['q','question'],a:['a','answer']}};
+const ARR_KEYS=['entries','words','items','data','list','vocab','records'];
+const pick=(o,keys)=>{for(const k of keys){const v=o[k];if(v!==undefined&&v!==null&&v!==''&&!(Array.isArray(v)&&!v.length))return v}return ''};
+const toArr=v=>Array.isArray(v)?v.map(String).filter(Boolean):(v===''||v==null?[]:String(v).split(/[\n；;]/).map(s=>s.trim()).filter(Boolean));
+function normEx(v){
+  if(!v)return [];
+  if(!Array.isArray(v))v=[v];
+  return v.map(e=>typeof e==='object'&&e?{ja:pick(e,SUB.ex.ja),zh:pick(e,SUB.ex.zh),casual:pick(e,SUB.ex.casual)}:{ja:String(e),zh:'',casual:''}).filter(e=>e.ja);
+}
+function normQuiz(v){
+  if(!v)return null;
+  if(typeof v==='string')return {q:v,a:''};
+  const q=pick(v,SUB.qz.q);return q?{q:String(q),a:String(pick(v,SUB.qz.a))}:null;
+}
+function findList(data){
+  if(Array.isArray(data))return data;
+  if(data&&typeof data==='object'){
+    for(const k of ARR_KEYS)if(Array.isArray(data[k]))return data[k];
+    for(const k in data)if(Array.isArray(data[k]))return data[k];
+  }
+  return [];
+}
+function normalize(raw,i){
+  const o=typeof raw==='object'&&raw?raw:{word:raw};
+  const g=k=>pick(o,MAP[k]);
+  return {id:String(g('id')!==''?g('id'):i+1),input:String(g('input')),word:String(g('word')),reading:String(g('reading')),kanji:String(g('kanji')),
+    pos:String(g('pos')),meaning:toArr(g('meaning')),frequency:String(g('frequency')),paraphrases:toArr(g('paraphrases')),
+    mnemonic:String(g('mnemonic')),examples:normEx(g('examples')),quiz:normQuiz(g('quiz')),note:String(g('note'))};
+}
 function start(data){
-  D=Array.isArray(data)?data:(data.entries||[]);
-  document.title=(data.title||'日语单词本');
+  D=findList(data).map(normalize);
+  const seen=new Set();D.forEach((x,i)=>{if(seen.has(x.id))x.id=String(i+1)+'_'+i;seen.add(x.id)});
+  document.title=(data&&data.title)||'日语单词本';
+  if(!D.length||!D.some(x=>x.word)){
+    $('#app').innerHTML='<div class="empty">没有识别到单词。<br>请检查 JSON 是否是数组（或含数组的对象），<br>并在 index.html 开头的 MAP 里加上你的字段名。</div>';stat();return;
+  }
   render();
 }
 fetch('japanese_vocab.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(start).catch(()=>{
@@ -146,10 +196,9 @@ function fillList(open){
 $('#app').addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   e.preventDefault();
-  const id=+b.closest('details').dataset.id,set=b.dataset.a==='star'?S:M;
+  const id=b.closest('details').dataset.id,set=b.dataset.a==='star'?S:M;
   set.has(id)?set.delete(id):set.add(id);save();
   b.classList.toggle('on',set.has(id));stat();
-  if(filter!=='all'&&(filter!=='star'||b.dataset.a==='star')){const keep=new Set([...document.querySelectorAll('details.c[open]')].map(d=>d.dataset.id));}
 });
 
 /* 闪卡 */
