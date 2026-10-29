@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日语单词本</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#1b2433;--sub:#5d6778;--line:#d5dbe3;--ac:#2f4b8f;--acbg:#e3e9f6;--ok:#2e7d5b;--okbg:#dff1e8;--star:#c98a0b;--bad:#b3402f}
+@media(prefers-color-scheme:dark){:root{--bg:#141a26;--card:#1d2535;--ink:#e8ecf3;--sub:#9aa6ba;--line:#2e394d;--ac:#8fa8e6;--acbg:#26324d;--ok:#6cc59a;--okbg:#1f3a30;--star:#e4a93a;--bad:#e8806f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif}
+.ja{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Songti SC",serif}
+main{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:8px 0 14px}
+h1{font-size:1.5rem;margin:0}
+.stat{color:var(--sub);font-size:.9rem}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+nav{display:flex;gap:6px;margin-bottom:14px}
+nav button{flex:1}
+button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button.on{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:600}
+button.go{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+button.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+button.no{border-color:var(--bad);color:var(--bad)}
+input[type=search]{width:100%;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{padding:4px 12px;font-size:.9rem;border-radius:16px}
+details.c{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+details.c[open]{border-color:var(--ac)}
+summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+.w{font-size:1.25rem;font-weight:600;min-width:0}
+.rd{color:var(--sub);font-size:.85rem}
+.m1{flex:1;min-width:0;color:var(--sub);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ic{padding:2px 8px;font-size:1rem;line-height:1.4;border:0;background:none;color:var(--sub)}
+.ic.on{background:none;color:var(--star)}
+.ic.dn.on{color:var(--ok)}
+.body{padding:2px 14px 14px;border-top:1px solid var(--line)}
+.body h4{margin:12px 0 2px;font-size:.85rem;color:var(--sub);font-weight:600}
+.body ul{margin:0;padding-left:20px}
+.tags span{display:inline-block;background:var(--acbg);color:var(--ac);border-radius:12px;padding:1px 10px;margin:2px 4px 2px 0;font-size:.85rem}
+.ex{margin:6px 0;padding-left:10px;border-left:3px solid var(--line)}
+.ex .z{color:var(--sub);font-size:.9rem}
+.ex .k{color:var(--sub);font-size:.85rem}
+.note{background:var(--acbg);border-radius:6px;padding:6px 10px;font-size:.88rem;margin-top:10px}
+.qz details{margin-top:4px}
+.qz summary{padding:0;display:block;color:var(--ac);cursor:pointer}
+.empty{text-align:center;color:var(--sub);padding:40px 0}
+.fc{background:var(--card);border:1px solid var(--line);border-radius:14px;min-height:300px;padding:26px 20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer}
+.fc .big{font-size:2.6rem;line-height:1.3;word-break:break-all}
+.fc .hint{color:var(--sub);font-size:.85rem;margin-top:16px}
+.fc .back{text-align:left;width:100%}
+.fc .back .rdb{font-size:1.5rem;text-align:center}
+.row{display:flex;gap:8px;margin-top:12px}
+.row button{flex:1;padding:12px}
+.pg{color:var(--sub);font-size:.9rem;text-align:center;margin:8px 0}
+.qbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 18px}
+.qbox .q{font-size:1.2rem;line-height:1.8}
+.ans{margin-top:14px;padding:10px 12px;background:var(--okbg);border-radius:8px;color:var(--ok);font-weight:600}
+.ld{color:var(--sub);text-align:center;padding:40px 0}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>日语单词本</h1><div class="stat" id="stat"></div></header>
+<div class="bar"><i id="bar"></i></div>
+<nav id="nav">
+<button data-t="list" class="on">词表</button>
+<button data-t="fc">闪卡</button>
+<button data-t="qz">测验</button>
+</nav>
+<div id="app"><div class="ld">加载中…</div></div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const load=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'))}catch(e){return new Set()}};
+const save=()=>{try{localStorage.setItem('jv_star',JSON.stringify([...S]));localStorage.setItem('jv_done',JSON.stringify([...M]))}catch(e){}};
+let D=[],S=load('jv_star'),M=load('jv_done'),tab='list',filter='all',kw='';
+let fc={deck:[],i:0,flip:false,all:false},qz={cur:null,show:false,right:0,total:0,pool:[]};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function start(data){
+  D=Array.isArray(data)?data:(data.entries||[]);
+  document.title=(data.title||'日语单词本');
+  render();
+}
+fetch('japanese_vocab.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(start).catch(()=>{
+  $('#app').innerHTML='<div class="empty">没能自动读取 japanese_vocab.json。<br>请把它和 index.html 放在同一目录并通过网址打开，或手动选择文件：<br><br><input type="file" id="pick" accept=".json,application/json"></div>';
+  $('#pick').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>start(JSON.parse(t)))};
+});
+
+function stat(){
+  $('#stat').textContent='已掌握 '+M.size+' / '+D.length+'，收藏 '+S.size;
+  $('#bar').style.width=(D.length?M.size/D.length*100:0)+'%';
+}
+function render(){
+  stat();
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  if(tab==='list')renderList();else if(tab==='fc')renderFc();else renderQz();
+}
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(!t)return;tab=t;if(t==='fc')buildDeck();if(t==='qz')buildQz();render()};
+
+/* 词表 */
+function match(x){
+  if(filter==='star'&&!S.has(x.id))return false;
+  if(filter==='todo'&&M.has(x.id))return false;
+  if(filter==='done'&&!M.has(x.id))return false;
+  if(!kw)return true;
+  const s=[x.input,x.word,x.reading,x.kanji,...(x.meaning||[])].join(' ').toLowerCase();
+  return s.includes(kw);
+}
+function card(x){
+  const ex=(x.examples||[]).map(e=>'<div class="ex"><div class="ja">'+esc(e.ja)+'</div><div class="z">'+esc(e.zh)+'</div>'+(e.casual?'<div class="k">口语：'+esc(e.casual)+'</div>':'')+'</div>').join('');
+  const qz=x.quiz?'<h4>自测</h4><div class="qz"><div>'+esc(x.quiz.q)+'</div><details><summary>看答案</summary><b>'+esc(x.quiz.a)+'</b></details></div>':'';
+  return '<details class="c" data-id="'+x.id+'"><summary><span class="w ja">'+esc(x.word)+'</span><span class="rd">'+esc(x.reading)+'</span><span class="m1">'+esc((x.meaning||[])[0])+'</span>'
+  +'<button class="ic dn'+(M.has(x.id)?' on':'')+'" data-a="done" title="已掌握" aria-label="标记已掌握">✓</button><button class="ic'+(S.has(x.id)?' on':'')+'" data-a="star" title="收藏" aria-label="收藏">★</button></summary>'
+  +'<div class="body">'
+  +(x.input&&x.input!==x.word?'<div class="note">你发的是「'+esc(x.input)+'」</div>':'')
+  +'<h4>词性与频率</h4><div>'+esc(x.pos)+(x.kanji?'　汉字：<span class="ja">'+esc(x.kanji)+'</span>':'')+'　频率：'+esc(x.frequency)+'</div>'
+  +'<h4>意思</h4><ul>'+(x.meaning||[]).map(m=>'<li>'+esc(m)+'</li>').join('')+'</ul>'
+  +((x.paraphrases||[]).length?'<h4>日常口语说法</h4><div class="tags">'+x.paraphrases.map(p=>'<span class="ja">'+esc(p)+'</span>').join('')+'</div>':'')
+  +(x.mnemonic?'<h4>记忆钩子</h4><div>'+esc(x.mnemonic)+'</div>':'')
+  +'<h4>例句</h4>'+ex+qz
+  +(x.note?'<div class="note">'+esc(x.note)+'</div>':'')
+  +'</div></details>';
+}
+function renderList(){
+  const opts=[['all','全部'],['todo','未掌握'],['done','已掌握'],['star','收藏']];
+  const open=new Set([...document.querySelectorAll('details.c[open]')].map(d=>d.dataset.id));
+  $('#app').innerHTML='<input type="search" id="kw" placeholder="搜索单词、读音、汉字或中文意思" value="'+esc(kw)+'">'
+  +'<div class="chips">'+opts.map(o=>'<button data-f="'+o[0]+'"'+(filter===o[0]?' class="on"':'')+'>'+o[1]+'</button>').join('')+'</div><div id="lst"></div>';
+  fillList(open);
+  $('#kw').oninput=e=>{kw=e.target.value.trim().toLowerCase();fillList(new Set())};
+  $('.chips').onclick=e=>{const f=e.target.dataset.f;if(!f)return;filter=f;renderList()};
+}
+function fillList(open){
+  const r=D.filter(match);
+  $('#lst').innerHTML=r.length?r.map(card).join(''):'<div class="empty">没有符合条件的单词，换个关键词或筛选试试。</div>';
+  document.querySelectorAll('details.c').forEach(d=>{if(open.has(d.dataset.id))d.open=true});
+}
+$('#app').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  e.preventDefault();
+  const id=+b.closest('details').dataset.id,set=b.dataset.a==='star'?S:M;
+  set.has(id)?set.delete(id):set.add(id);save();
+  b.classList.toggle('on',set.has(id));stat();
+  if(filter!=='all'&&(filter!=='star'||b.dataset.a==='star')){const keep=new Set([...document.querySelectorAll('details.c[open]')].map(d=>d.dataset.id));}
+});
+
+/* 闪卡 */
+function buildDeck(){
+  fc.deck=shuffle(D.filter(x=>fc.all||!M.has(x.id)));fc.i=0;fc.flip=false;
+}
+function renderFc(){
+  const x=fc.deck[fc.i];
+  const top='<label class="stat"><input type="checkbox" id="all"'+(fc.all?' checked':'')+'> 包含已掌握的词</label>';
+  if(!x){$('#app').innerHTML=top+'<div class="empty">'+(fc.deck.length?'这一轮学完了。':'没有需要复习的词了。')+'</div><div class="row"><button class="go" id="again">重新洗牌再来一轮</button></div>';bindFc();return}
+  const e=(x.examples||[])[0];
+  const front='<div class="big ja">'+esc(x.word)+'</div><div class="hint">点击卡片或按空格键翻面</div>';
+  const back='<div class="back"><div class="rdb ja">'+esc(x.reading)+'</div><div class="rd" style="text-align:center">'+esc(x.pos)+(x.kanji?'　'+esc(x.kanji):'')+'</div>'
+   +'<ul>'+(x.meaning||[]).map(m=>'<li>'+esc(m)+'</li>').join('')+'</ul>'+(e?'<div class="ex"><div class="ja">'+esc(e.ja)+'</div><div class="z">'+esc(e.zh)+'</div></div>':'')+'</div>';
+  $('#app').innerHTML=top+'<div class="pg">'+(fc.i+1)+' / '+fc.deck.length+'</div><div class="fc" id="fcard" tabindex="0" role="button" aria-label="翻转卡片">'+(fc.flip?back:front)+'</div>'
+  +'<div class="row"><button class="no" id="no">还不熟</button><button class="ok" id="yes">认识了</button></div>'
+  +'<div class="row"><button id="prev">上一张</button><button id="next">下一张</button></div>';
+  bindFc();
+}
+function bindFc(){
+  const a=$('#all');if(a)a.onchange=e=>{fc.all=e.target.checked;buildDeck();render()};
+  const g=$('#again');if(g)g.onclick=()=>{buildDeck();render()};
+  const c=$('#fcard');if(!c)return;
+  c.onclick=()=>{fc.flip=!fc.flip;renderFc()};
+  $('#prev').onclick=()=>fcGo(-1);$('#next').onclick=()=>fcGo(1);
+  $('#yes').onclick=()=>{M.add(fc.deck[fc.i].id);save();stat();fcGo(1)};
+  $('#no').onclick=()=>{S.add(fc.deck[fc.i].id);save();stat();fcGo(1)};
+}
+function fcGo(d){
+  fc.i=fc.i+d;fc.flip=false;
+  if(fc.i<0)fc.i=0;
+  if(fc.i>=fc.deck.length){fc.deck=[];}
+  renderFc();
+}
+document.addEventListener('keydown',e=>{
+  if(tab!=='fc'||!fc.deck.length||e.target.tagName==='INPUT')return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();fc.flip=!fc.flip;renderFc()}
+  else if(e.key==='ArrowRight')fcGo(1);else if(e.key==='ArrowLeft')fcGo(-1);
+});
+
+/* 测验 */
+function buildQz(){qz.pool=shuffle(D.filter(x=>x.quiz));qz.cur=qz.pool.pop()||null;qz.show=false;qz.right=0;qz.total=0}
+function renderQz(){
+  const x=qz.cur;
+  const sc='<div class="pg">本轮答对 '+qz.right+' / '+qz.total+'，剩余 '+qz.pool.length+' 题</div>';
+  if(!x){$('#app').innerHTML=sc+'<div class="empty">题目做完了。</div><div class="row"><button class="go" id="qr">重新开始</button></div>';$('#qr').onclick=()=>{buildQz();render()};return}
+  $('#app').innerHTML=sc+'<div class="qbox"><div class="rd">'+esc(x.word)+'</div><div class="q ja">'+esc(x.quiz.q)+'</div>'
+  +(qz.show?'<div class="ans">答案：'+esc(x.quiz.a)+'</div><div class="row"><button class="no" id="bad">答错了</button><button class="ok" id="good">答对了</button></div>':'<div class="row"><button class="go" id="sh">看答案</button></div>')+'</div>';
+  if(qz.show){
+    $('#good').onclick=()=>qzNext(true);$('#bad').onclick=()=>qzNext(false);
+  }else $('#sh').onclick=()=>{qz.show=true;renderQz()};
+}
+function qzNext(ok){
+  qz.total++;if(ok)qz.right++;else{S.add(qz.cur.id);save();stat()}
+  qz.cur=qz.pool.pop()||null;qz.show=false;renderQz();
+}
+</script>
+</body>
+</html>
